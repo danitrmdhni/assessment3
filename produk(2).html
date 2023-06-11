@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Barang</title>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid hsl(32, 89%, 41%);
+    }
+
+    th {
+      background-color: #ee863b;
+      font-weight: bold;
+    }
+
+    .form-container {
+      margin-bottom: 20px;
+    }
+
+    .form-container label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .form-container input[type="text"],
+    .form-container input[type="number"] {
+      width: 200px;
+      padding: 5px;
+      margin-bottom: 10px;
+    }
+
+    .form-container input[type="submit"] {
+      padding: 5px 5px;
+      background-color: #ea7209;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Tambah Data</h2>
+    <form id="addForm">
+      <div class="form-group">
+        <label for="nama_produk">Nama Produk:</label>
+        <input type="text" id="nama_produk" name="nama_produk">
+        <span class="error"></span>
+      </div>
+      <div class="form-group">
+        <label for="deskripsi_produk">Harga Produk:</label>
+        <input type="text" id="deskripsi_produk" name="harga_produk">
+        <span class="error"></span>
+      </div>
+      <div class="form-group">
+        <label for="harga_produk">Stok:</label>
+        <input type="number" id="stok" name="stok">
+        <span class="error"></span>
+      </div>
+      <input type="submit" value="Tambah">
+    </form>
+  </div>
+  
+  <div class="form-container">
+    <h2>Update Data</h2>
+    <form id="updateForm">
+      <div class="form-group">
+        <label for="update_id">ID:</label>
+        <input type="text" id="update_id" name="id_produk">
+        <span class="error"></span>
+      </div>
+      <div class="form-group">
+        <label for="update_nama_produk">Nama Produk:</label>
+        <input type="text" id="update_nama_produk" name="nama_produk">
+        <span class="error"></span>
+      </div>
+      <div class="form-group">
+        <label for="update_deskripsi_produk">Harga Produk:</label>
+        <input type="text" id="update_deskripsi_produk" name="harga_produk">
+        <span class="error"></span>
+      </div>
+      <div class="form-group">
+        <label for="update_harga_produk">Stok:</label>
+        <input type="number" id="update_harga_produk" name="stok">
+        <span class="error"></span>
+      </div>
+      <input type="submit" value="Update">
+    </form>
+  </div>
+  
+
+  <table id="barangTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nama Produk</th>
+        <th>Harga Produk</th>
+        <th>Stok</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+  <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // Inisialisasi DataTable
+      var dataTable = $('#barangTable').DataTable({
+        ajax: {
+          url: 'produk.php', 
+          method: 'GET',
+          dataSrc: ''
+        },
+        columns: [
+          { data: 'id_produk' },
+          { data: 'nama_produk' },
+          { data: 'harga_produk' },
+          { data: 'stok' }
+        ]
+      });
+
+      // Validasi Form Tambah
+      $('#addForm').validate({
+        rules: {
+          nama_produk: {
+            required: true
+          },
+          harga_produk: {
+            required: true
+          },
+          stok: {
+            required: true,
+            number: true
+          }
+        },
+        messages: {
+          nama_produk: {
+            required: 'Nama Produk harus diisi'
+          },
+          harga_produk: {
+            required: 'Harga Produk harus diisi'
+          },
+          stok: {
+            required: 'Stok harus diisi',
+            number: 'Stok harus berupa angka'
+          }
+        },
+        submitHandler: function(form) {
+          // Proses submit form tambah
+          $.ajax({
+            url: 'produk.php', 
+            method: 'POST',
+            data: $(form).serialize(),
+            dataType: 'json',
+            success: function(response) {
+              if (response.status === 'berhasil') {
+                // Refresh DataTable
+                dataTable.ajax.reload();
+                // Reset form
+                form.reset();
+              }
+            }
+          });
+        }
+      });
+
+      // Validasi Form Update
+      $('#updateForm').validate({
+        rules: {
+          id_produk: {
+            required: true
+          },
+          nama_produk: {
+            required: true
+          },
+          harga_produk: {
+            required: true
+          },
+          stok: {
+            required: true,
+            number: true
+          }
+        },
+        messages: {
+          id_produk: {
+            required: 'ID harus diisi'
+          },
+          nama_produk: {
+            required: 'Nama Produk harus diisi'
+          },
+          harga_produk: {
+            required: 'Harga Produk harus diisi'
+          },
+          stok: {
+            required: 'Stok harus diisi',
+            number: 'Stok harus berupa angka'
+          }
+        },
+        submitHandler: function(form) {
+          // Proses submit form update
+          $.ajax({
+            url: 'produk.php', 
+            method: 'PUT',
+            data: $(form).serialize(),
+            dataType: 'json',
+            success: function(response) {
+              if (response.status === 'berhasil') {
+                // Refresh DataTable
+                dataTable.ajax.reload();
+                // Reset form
+                form.reset();
+              }
+            }
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
